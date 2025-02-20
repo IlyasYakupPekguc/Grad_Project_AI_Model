@@ -1,0 +1,192 @@
+	
+start_time	"2025-01-27T13:22:29.6432221+03:00"
+end_time	"2025-01-27T13:23:28.4532952+03:00"
+packet_count	3064
+packets	
+0	
+interface	"\\Device\\NPF_{78BD149F-F0C6-4655-A886-42FD7871D171}"
+timestamp	"2025-01-27T13:22:27.1346+03:00"
+size	54
+protocol	"TCP"
+source_ip	"192.168.1.25"
+destination_ip	"216.58.212.38"
+source_port	60028
+destination_port	443
+ttl	255
+tcp_flags	"SYN=false ACK=true FIN=true"
+packet_type	"IPv4"
+direction	""
+hour	13
+minute	22
+second	27
+day_of_week	"Monday"
+1	
+interface	"\\Device\\NPF_{78BD149F-F0C6-4655-A886-42FD7871D171}"
+timestamp	"2025-01-27T13:22:27.15432+03:00"
+size	54
+protocol	"TCP"
+source_ip	"216.58.212.38"
+destination_ip	"192.168.1.25"
+source_port	443
+destination_port	60028
+ttl	1045
+tcp_flags	"SYN=false ACK=true FIN=true"
+packet_type	"IPv4"
+direction	""
+hour	13
+minute	22
+second	27
+day_of_week	"Monday"
+2	
+interface	"\\Device\\NPF_{78BD149F-F0C6-4655-A886-42FD7871D171}"
+timestamp	"2025-01-27T13:22:27.154399+03:00"
+size	54
+protocol	"TCP"
+source_ip	"192.168.1.25"
+destination_ip	"216.58.212.38"
+source_port	60028
+destination_port	443
+ttl	255
+tcp_flags	"SYN=false ACK=true FIN=false"
+packet_type	"IPv4"
+direction	""
+hour	13
+minute	22
+second	27
+day_of_week	"Monday"
+3	
+interface	"\\Device\\NPF_{78BD149F-F0C6-4655-A886-42FD7871D171}"
+timestamp	"2025-01-27T13:22:28.20086+03:00"
+size	80
+protocol	"TCP"
+source_ip	"140.82.114.26"
+destination_ip	"192.168.1.25"
+source_port	443
+destination_port	56130
+ttl	92
+tcp_flags	"SYN=false ACK=true FIN=false"
+packet_type	"IPv4"
+direction	""
+hour	13
+minute	22
+second	28
+day_of_week	"Monday"
+4	
+interface	"\\Device\\NPF_{78BD149F-F0C6-4655-A886-42FD7871D171}"
+timestamp	"2025-01-27T13:22:28.201659+03:00"
+size	84
+protocol	"TCP"
+source_ip	"192.168.1.25"
+destination_ip	"140.82.114.26"
+source_port	56130
+destination_port	443
+ttl	254
+tcp_flags	"SYN=false ACK=true FIN=false"
+packet_type	"IPv4"
+direction	""
+hour	13
+minute	22
+second	28
+day_of_week	"Monday"
+5	
+interface	"\\Device\\NPF_{78BD149F-F0C6-4655-A886-42FD7871D171}"
+timestamp	"2025-01-27T13:22:28.346156+03:00"
+size	56
+protocol	"TCP"
+source_ip	"140.82.114.26"
+destination_ip	"192.168.1.25"
+source_port	443
+destination_port	56130
+ttl	92
+tcp_flags	"SYN=false ACK=true FIN=false"
+packet_type	"IPv4"
+direction	""
+hour	13
+minute	22
+second	28
+day_of_week	"Monday"
+6	
+interface	"\\Device\\NPF_{78BD149F-F0C6-4655-A886-42FD7871D171}"
+timestamp	"2025-01-27T13:22:28.419596+03:00"
+size	55
+protocol	"TCP"
+source_ip	"192.168.1.25"
+destination_ip	"34.100.128.0"
+source_port	61037
+destination_port	443
+ttl	252
+tcp_flags	"SYN=false ACK=true FIN=false"
+packet_type	"IPv4"
+direction	""
+hour	13
+minute	22
+second	28
+day_of_week	"Monday"
+7	
+interface	"\\Device\\NPF_{78BD149F-F0C6-4655-A886-42FD7871D171}"
+timestamp	"2025-01-27T13:22:28.608435+03:00"
+size	66
+protocol	"TCP"
+source_ip	"34.100.128.0"
+destination_ip	"192.168.1.25"
+source_port	443
+destination_port	61037
+ttl	529
+tcp_flags	"SYN=false ACK=true FIN=false"
+packet_type	"IPv4"
+direction	""
+hour	13
+minute	22
+second	28
+day_of_week	"Monday"
+8	
+interface	"\\Device\\NPF_Loopback"
+timestamp	"2025-01-27T13:22:29.559387+03:00"
+size	45
+protocol	"TCP"
+source_ip	"127.0.0.1"
+destination_ip	"127.0.0.1"
+source_port	61413
+destination_port	61412
+ttl	255
+tcp_flags	"SYN=false ACK=true FIN=false"
+packet_type	"IPv4"
+direction	""
+hour	13
+minute	22
+second	29
+day_of_week	"Monday"
+9	
+interface	"\\Device\\NPF_Loopback"
+timestamp	"2025-01-27T13:22:29.559447+03:00"
+size	44
+protocol	"TCP"
+source_ip	"127.0.0.1"
+destination_ip	"127.0.0.1"
+source_port	61412
+destination_port	61413
+ttl	255
+tcp_flags	"SYN=false ACK=true FIN=false"
+packet_type	"IPv4"
+direction	""
+hour	13
+minute	22
+second	29
+day_of_week	"Monday"
+10	
+interface	"\\Device\\NPF_Loopback"
+timestamp	"2025-01-27T13:22:29.559957+03:00"
+size	45
+protocol	"TCP"
+source_ip	"127.0.0.1"
+destination_ip	"127.0.0.1"
+source_port	49697
+destination_port	49698
+ttl	255
+tcp_flags	"SYN=false ACK=true FIN=false"
+packet_type	"IPv4"
+direction	""
+hour	13
+minute	22
+second	29
+day_of_week	"Monday"
