@@ -4,15 +4,13 @@ from datetime import datetime
 import numpy as np
 from collections import Counter
 
-def analyze_traffic_patterns(data): # Analyze thetrafiic to identify key charachterics and relationships
+def analyze_traffic_patterns(json_file): # Analyze thetrafiic to identify key charachterics and relationships
 
-    # COnvert the data into a pandas dataframe
-    packets = []
-    for i in range(len(data['packets'])):
-        packet = data['packets'][str(i)]
-        packets.append(packet)
+    # load the Json File
+    with open(json_file, 'r') as f:
+        data = json.load(f)
 
-    df = pd.DataFrame(packets)
+    df = pd.DataFrame(data['packets'])
 
     # Convert timestamp strings to datetime objects
     df['timestamp'] = pd.to_datetime(df['timestamp'])
@@ -20,41 +18,58 @@ def analyze_traffic_patterns(data): # Analyze thetrafiic to identify key charach
     # basic statics
     analysis = {
         'total_packets': len(df),
-        'unique_protocols': df['protocol'].unique.tolist(),
-        'unique_source_ips': df['source_ip'].unique.tolist(),
-        'unique_dest_ips': df['destination_ip'].unique.tolist(),
+        'unique_protocols': df['protocol'].unique().tolist(),
+        'unique_source_ips': df['source_ip'].unique().tolist(),
+        'unique_dest_ips': df['destination_ip'].unique().tolist(),
+        'start_time': data['start_time'],
+        'end_time': data['end_time'],
         'packet_size_stats': {
             'mean': df['size'].mean(),
             'std': df['size'].std(),
             'min': df['size'].min(),
             'max': df['size'].max()
-        },
-        'protocol_distribution': df['protocol'].value_counts().to_dict(),
-        'common_ports': {
-            'source': Counter(df['source_port'].tolist()).most_common(5),
-            'destination': Counter(df['destination_port'].to_list()).most_common(5)
-        },
-        'tamproral_patterns': {
-            'packets_per_second': df.groupby('second').size().to_dict(),
-            'pckets_per_minute': df.groupby('minute').size().to_dict()
         }
     }
 
-    # Analyze TCP flags
-    tcp_patterns = df[df['protocol'] == 'TCP']['tcp_flags'].value_counts().todict()
-    analysis['tcp_patterns'] = tcp_patterns
-
-    # calculate time-based featutres
-    df['time_diff'] = df['timestamp'].diff().dt.total_seconds()
-
-    analysis['timing_stats'] = {
-        'mean_tme_between_packets': df['time_diff'].mean(),
-        'std_time_between_packets': df['time_diff'].std()
+    # temporal analysis
+    analysis['temporal_patterns'] = {
+        'packets_per_second': df.groupby(df['timestamp'].dt.second).size().to_dict(),
+        'packets_per_minute': df.groupby(df['timestamp'].dt.minute).size().to_dict(),
+        'packets_per_hour': df.groupby(df['timestamp'].dt.hour).size().to_dict(),
     }
 
+    # Protocol Analysis
+    analysis['protocol_distribution'] = df['protocol'].value_counts().to_dict()
 
-    return analysis, df
+    
+    # Analyze TCP flags
+    tcp_df = df[df['protocol'] == 'TCP']
+    tcp_flags = tcp_df['tcp_flags'].value_counts().to_dict()
+    analysis['tcp_patterns'] = {
+        'flag_distribution': tcp_flags,
+        'total_tcp_packets': len(tcp_df)
+    }
 
+    # Interface Analysis
+    analysis['interface_distribution'] = df['interface'].value_counts().to_dict()
+
+    # Port Analysis
+    analysis['port_analysis'] = {
+        'top_source_ports': df['source_port'].value_counts().head(10).to_dict(),
+        'top_dest_ports': df['destination_port'].value_counts().head(10).to_dict()
+    }
+
+    # IP communication patterns
+    ip_pairs = df.apply(lambda x: f"{x['source_ip']}->{x['destination_ip']}", axis=1)
+    analysis['ip_communication_patterns'] = ip_pairs.value_counts().head(10).to_dict()
+
+    return analysis
+
+try:
+    results = analyze_traffic_patterns('network_data_2_2025-01-27_13-16-37.json')
+    print(json.dumps(results, indent=2))
+except Exception as e:
+    print(f"Error analyzing traffic: {str(e)}")
 
 
 def print_analysis_results(analysis):
