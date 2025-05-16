@@ -1,0 +1,86 @@
+{
+    "user_1": {
+        "errors": {
+            "mean": 0.052484167881506054,
+            "max": 0.5290104157529995,
+            "min": 0.0013440549001097679,
+            "std": 0.06476651664277623,
+            "ratio_to_train": 1.001668393074377
+        },
+        "deviations": {
+            "mean": 31.260652753664147,
+            "max": 100.0,
+            "min": 0.18856898988981136,
+            "std": 30.099501895611684,
+            "statistical": 0.0
+        },
+        "anomalies": {
+            "threshold": 90.0,
+            "count": 377,
+            "percentage": 0.1987432258608692
+        },
+        "feature_deviations": {
+            "incoming_ratio": 30.687542820176997,
+            "outgoing_ratio": 31.077933268948865,
+            "incoming_bytes_ratio": 46.87407080839106,
+            "outgoing_bytes_ratio": 46.894332786014324,
+            "direction_encoded": 0.7693840848403302
+        }
+    },
+    "user_2": {
+        "errors": {
+            "mean": 0.053774556222367584,
+            "max": 0.5438144733393264,
+            "min": 0.0013440549001097679,
+            "std": 0.0616344611191413,
+            "ratio_to_train": 1.0262956524557367
+        },
+        "deviations": {
+            "mean": 33.11942222271745,
+            "max": 100.0,
+            "min": 0.18856898988981136,
+            "std": 29.181827943648408,
+            "statistical": 21.881710262154712
+        },
+        "anomalies": {
+            "threshold": 90.0,
+            "count": 51,
+            "percentage": 0.09878169245966416
+        },
+        "feature_deviations": {
+            "incoming_ratio": 33.933359655570754,
+            "outgoing_ratio": 34.56079906999392,
+            "incoming_bytes_ratio": 48.067962429334976,
+            "outgoing_bytes_ratio": 48.20365228440642,
+            "direction_encoded": 0.8313376742743376
+        }
+    },
+    "user_3": {
+        "errors": {
+            "mean": 0.0416376942036609,
+            "max": 0.5852283544011004,
+            "min": 0.0013440549001097679,
+            "std": 0.057692737053256206,
+            "ratio_to_train": 0.7946617795001708
+        },
+        "deviations": {
+            "mean": 25.27560562669599,
+            "max": 100.0,
+            "min": 0.18856898988981136,
+            "std": 28.67035259762959,
+            "statistical": 22.308243890314486
+        },
+        "anomalies": {
+            "threshold": 90.0,
+            "count": 399,
+            "percentage": 0.02702146276185084
+        },
+        "feature_deviations": {
+            "incoming_ratio": 24.68235945343331,
+            "outgoing_ratio": 24.98308199269618,
+            "incoming_bytes_ratio": 38.07510944339046,
+            "outgoing_bytes_ratio": 38.05740643777744,
+            "direction_encoded": 0.5800708062688589
+        }
+    }
+}

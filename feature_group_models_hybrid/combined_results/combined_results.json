@@ -1,0 +1,104 @@
+{
+    "user_3": {
+        "group_metrics": {
+            "temporal": {
+                "mean_deviation": 59.92920557028292,
+                "max_deviation": 60.0005784352363,
+                "anomaly_percentage": 0.0,
+                "distance_ratio": 157.7306011434715
+            },
+            "volume": {
+                "mean_deviation": 29.598565076096733,
+                "max_deviation": 96.66781128287919,
+                "anomaly_percentage": 6.81577457463206,
+                "distance_ratio": 1.080034216390021
+            },
+            "direction": {
+                "mean_deviation": 25.27560562669599,
+                "max_deviation": 100.0,
+                "anomaly_percentage": 0.02702146276185084,
+                "distance_ratio": 0.7946617795001708
+            }
+        },
+        "combined_metrics": {
+            "weighted_deviation": 39.56759344036131,
+            "max_group_deviation": 59.92920557028292,
+            "overall_deviation": 39.56759344036131,
+            "anomaly_percentages": {
+                "temporal": 0.0,
+                "volume": 6.81577457463206,
+                "direction": 0.02702146276185084
+            },
+            "overall_anomaly_percentage": 2.2809320124646373,
+            "max_deviation_group": "temporal"
+        }
+    },
+    "user_2": {
+        "group_metrics": {
+            "temporal": {
+                "mean_deviation": 98.18511125035752,
+                "max_deviation": 100.0,
+                "anomaly_percentage": 93.71089891340138,
+                "distance_ratio": 40.70186540423838
+            },
+            "volume": {
+                "mean_deviation": 29.624979645893617,
+                "max_deviation": 74.55887495311791,
+                "anomaly_percentage": 5.3400220806136085,
+                "distance_ratio": 1.0029990124289714
+            },
+            "direction": {
+                "mean_deviation": 33.11942222271745,
+                "max_deviation": 100.0,
+                "anomaly_percentage": 0.09878169245966416,
+                "distance_ratio": 1.0262956524557367
+            }
+        },
+        "combined_metrics": {
+            "weighted_deviation": 56.470722835035325,
+            "max_group_deviation": 98.18511125035752,
+            "overall_deviation": 56.470722835035325,
+            "anomaly_percentages": {
+                "temporal": 93.71089891340138,
+                "volume": 5.3400220806136085,
+                "direction": 0.09878169245966416
+            },
+            "overall_anomaly_percentage": 33.049900895491554,
+            "max_deviation_group": "temporal"
+        }
+    },
+    "user_1": {
+        "group_metrics": {
+            "temporal": {
+                "mean_deviation": 17.799839681327597,
+                "max_deviation": 60.00166521401659,
+                "anomaly_percentage": 7.076207747295617,
+                "distance_ratio": 1.0021081009345503
+            },
+            "volume": {
+                "mean_deviation": 31.05026995507109,
+                "max_deviation": 72.88105813574023,
+                "anomaly_percentage": 1.4987453345423107,
+                "distance_ratio": 1.0001431715377465
+            },
+            "direction": {
+                "mean_deviation": 31.260652753664147,
+                "max_deviation": 100.0,
+                "anomaly_percentage": 0.1987432258608692,
+                "distance_ratio": 1.001668393074377
+            }
+        },
+        "combined_metrics": {
+            "weighted_deviation": 26.149733011960024,
+            "max_group_deviation": 31.260652753664147,
+            "overall_deviation": 26.149733011960024,
+            "anomaly_percentages": {
+                "temporal": 7.076207747295617,
+                "volume": 1.4987453345423107,
+                "direction": 0.1987432258608692
+            },
+            "overall_anomaly_percentage": 2.924580853423023,
+            "max_deviation_group": "direction"
+        }
+    }
+}

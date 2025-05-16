@@ -1,0 +1,102 @@
+import os
+import pandas as pd
+import json
+from sklearn.preprocessing import StandardScaler
+from sklearn.ensemble import IsolationForest
+import joblib
+
+# 1. Klasördeki tüm JSON dosyalarını oku
+def load_all_json_files(folder_path):
+    flows = []
+    
+    for filename in os.listdir(folder_path):
+        if filename.endswith(".json"):  # Sadece .json dosyalarını dikkate al
+            file_path = os.path.join(folder_path, filename)
+            try:
+                with open(file_path, 'r') as f:
+                    data = json.load(f)
+
+                # JSON yapısını kontrol et ve buna göre işle
+                if isinstance(data, list):
+                    # Eğer veri bir liste ise, önceki yapı için kullanılan kod
+                    for entry in data:
+                        if 'flows' in entry:
+                            for flow in entry['flows']:
+                                flow_data = extract_flow_data(flow)
+                                flows.append(flow_data)
+                elif isinstance(data, dict) and 'flows' in data:
+                    # Eğer veri bir sözlük ve 'flows' anahtarı içeriyorsa
+                    for flow in data['flows']:
+                        flow_data = extract_flow_data(flow)
+                        flows.append(flow_data)
+                else:
+                    print(f"Beklenmeyen yapı, dosya: {filename}")
+            except json.JSONDecodeError:
+                print(f"JSON çözümleme hatası, dosya: {filename}")
+            except Exception as e:
+                print(f"Dosya işlenirken hata oluştu {filename}: {str(e)}")
+    
+    return pd.DataFrame(flows) if flows else pd.DataFrame()
+
+# Akış verilerini çıkarmak için yardımcı fonksiyon
+def extract_flow_data(flow):
+    return {
+        'flow_id': flow.get('flow_id', ''),
+        'protocol': flow.get('protocol', ''),
+        'application_protocol': flow.get('application_protocol', ''),
+        'source_ip': flow.get('source_ip', ''),
+        'destination_ip': flow.get('destination_ip', ''),
+        'source_port': flow.get('source_port', 0),
+        'destination_port': flow.get('destination_port', 0),
+        'direction': flow.get('direction', ''),
+        'duration_seconds': flow.get('duration_seconds', 0),
+        'packet_count': flow.get('packet_count', 0),
+        'total_bytes': flow.get('total_bytes', 0),
+        'bytes_per_second': flow.get('bytes_per_second', 0),
+        'packets_per_second': flow.get('packets_per_second', 0),
+        'min_packet_size': flow.get('min_packet_size', 0),
+        'max_packet_size': flow.get('max_packet_size', 0),
+        'avg_packet_size': flow.get('avg_packet_size', 0),
+        'outgoing_packets': flow.get('outgoing_packets', 0),
+        'incoming_packets': flow.get('incoming_packets', 0),
+        'outgoing_bytes': flow.get('outgoing_bytes', 0),
+        'incoming_bytes': flow.get('incoming_bytes', 0),
+    }
+
+# 2. Veriyi oku ve işleme
+folder_path = 'data/flows_data'  # JSON dosyalarının bulunduğu klasörün yolu
+df = load_all_json_files(folder_path)
+
+if df.empty:
+    print("Hiç veri bulunamadı veya işlenemedi!")
+    exit(1)
+
+# 3. Oturum bazında grupla: (kaynak IP + kaynak port + hedef IP + hedef port + protokol)
+df['session'] = df['source_ip'] + ":" + df['source_port'].astype(str) + "-" + df['destination_ip'] + ":" + df['destination_port'].astype(str) + "-" + df['protocol']
+
+# 4. Gruplama işlemi (toplam byte ve paket sayısı gibi özellikleri grupla)
+grouped = df.groupby("session").agg({
+    "total_bytes": "sum",  # toplam veri miktarı
+    "packet_count": "sum",  # toplam paket sayısı
+    "duration_seconds": "mean",  # oturum süresi
+    "bytes_per_second": "mean",  # saniye başına gönderilen byte
+    "packets_per_second": "mean",  # saniye başına gönderilen paket
+}).reset_index()
+
+# 5. Özellikler
+grouped.columns = ['session', 'total_bytes', 'packet_count', 'avg_duration', 'avg_bytes_per_second', 'avg_packets_per_second']
+X = grouped[['total_bytes', 'packet_count', 'avg_duration', 'avg_bytes_per_second', 'avg_packets_per_second']]
+
+# 6. Normalizasyon
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+# 7. Modeli eğit
+model = IsolationForest(contamination=0.01, random_state=42, n_estimators=200, max_samples=256)  # Kontaminasyon oranını 
+model.fit(X_scaled)
+
+# 8. Modeli kaydet
+joblib.dump(model, "session_anomaly_model.pkl")
+joblib.dump(scaler, "scaler.pkl")
+
+print("Model eğitim tamamlandı ve kaydedildi.")

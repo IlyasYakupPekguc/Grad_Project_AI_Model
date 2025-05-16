@@ -1,0 +1,238 @@
+import os
+import pandas as pd
+import json
+import numpy as np
+from sklearn.preprocessing import StandardScaler
+from sklearn.ensemble import IsolationForest
+import joblib
+import matplotlib.pyplot as plt
+from sklearn.metrics import make_scorer
+
+# 1. Read all JSON files in the folder
+def load_all_json_files(folder_path):
+    flows = []
+    
+    for filename in os.listdir(folder_path):
+        if filename.endswith(".json"):  # Only consider .json files
+            file_path = os.path.join(folder_path, filename)
+            try:
+                with open(file_path, 'r') as f:
+                    data = json.load(f)
+
+                # Check JSON structure and process accordingly
+                if isinstance(data, list):
+                    # If data is a list
+                    for entry in data:
+                        if 'flows' in entry:
+                            for flow in entry['flows']:
+                                flow_data = extract_flow_data(flow)
+                                flows.append(flow_data)
+                elif isinstance(data, dict) and 'flows' in data:
+                    # If data is a dictionary with 'flows' key
+                    for flow in data['flows']:
+                        flow_data = extract_flow_data(flow)
+                        flows.append(flow_data)
+                else:
+                    print(f"Unexpected structure, file: {filename}")
+            except json.JSONDecodeError:
+                print(f"JSON parsing error, file: {filename}")
+            except Exception as e:
+                print(f"Error processing file {filename}: {str(e)}")
+    
+    return pd.DataFrame(flows) if flows else pd.DataFrame()
+
+# Helper function to extract flow data
+def extract_flow_data(flow):
+    return {
+        'flow_id': flow.get('flow_id', ''),
+        'protocol': flow.get('protocol', ''),
+        'application_protocol': flow.get('application_protocol', ''),
+        'source_ip': flow.get('source_ip', ''),
+        'destination_ip': flow.get('destination_ip', ''),
+        'source_port': flow.get('source_port', 0),
+        'destination_port': flow.get('destination_port', 0),
+        'direction': flow.get('direction', ''),
+        'duration_seconds': flow.get('duration_seconds', 0),
+        'packet_count': flow.get('packet_count', 0),
+        'total_bytes': flow.get('total_bytes', 0),
+        'bytes_per_second': flow.get('bytes_per_second', 0),
+        'packets_per_second': flow.get('packets_per_second', 0),
+        'min_packet_size': flow.get('min_packet_size', 0),
+        'max_packet_size': flow.get('max_packet_size', 0),
+        'avg_packet_size': flow.get('avg_packet_size', 0),
+        'outgoing_packets': flow.get('outgoing_packets', 0),
+        'incoming_packets': flow.get('incoming_packets', 0),
+        'outgoing_bytes': flow.get('outgoing_bytes', 0),
+        'incoming_bytes': flow.get('incoming_bytes', 0),
+    }
+
+# FIXED VERSION: Simple train and parameter search for Isolation Forest
+def train_model_with_manual_search(folder_path, output_model_path="optimized_model.pkl", output_scaler_path="optimized_scaler.pkl"):
+    # 1. Load and process data
+    print("Loading and processing data...")
+    df = load_all_json_files(folder_path)
+
+    if df.empty:
+        print("No data found or could not be processed!")
+        return
+    
+    # 2. Group by session: (source IP + source port + destination IP + destination port + protocol)
+    print("Grouping by session...")
+    df['session'] = df['source_ip'] + ":" + df['source_port'].astype(str) + "-" + df['destination_ip'] + ":" + df['destination_port'].astype(str) + "-" + df['protocol']
+
+    # 3. Aggregate features by session
+    grouped = df.groupby("session").agg({
+        "total_bytes": "sum",  # total data amount
+        "packet_count": "sum",  # total packet count
+        "duration_seconds": "mean",  # session duration
+        "bytes_per_second": "mean",  # bytes per second
+        "packets_per_second": "mean",  # packets per second
+    }).reset_index()
+
+    # 4. Features
+    grouped.columns = ['session', 'total_bytes', 'packet_count', 'avg_duration', 'avg_bytes_per_second', 'avg_packets_per_second']
+    X = grouped[['total_bytes', 'packet_count', 'avg_duration', 'avg_bytes_per_second', 'avg_packets_per_second']]
+    
+    # Print summary statistics
+    print("\nFeature statistics:")
+    print(X.describe())
+
+    # 5. Normalization
+    print("\nPerforming normalization...")
+    scaler = StandardScaler()
+    X_scaled = scaler.fit_transform(X)
+    
+    # 6. Manual parameter search (avoids GridSearchCV issues with Isolation Forest)
+    print("\nPerforming manual parameter search...")
+    
+    # Define parameter combinations
+    contamination_values = [0.01, 0.05, 0.1, 0.15, 0.2]
+    n_estimators_values = [50, 100, 200]
+    max_samples_values = [256, 512, 'auto']
+    
+    # Initialize variables to track best model
+    best_score = float('-inf')
+    best_params = None
+    best_model = None
+    
+    # Store all results
+    all_results = []
+    
+    # Manual grid search
+    for contamination in contamination_values:
+        for n_estimators in n_estimators_values:
+            for max_samples in max_samples_values:
+                print(f"Testing: contamination={contamination}, n_estimators={n_estimators}, max_samples={max_samples}")
+                
+                # Train model with current parameters
+                model = IsolationForest(
+                    contamination=contamination, 
+                    n_estimators=n_estimators, 
+                    max_samples=max_samples, 
+                    random_state=42
+                )
+                model.fit(X_scaled)
+                
+                # Get scores (negative means more anomalous)
+                scores = model.decision_function(X_scaled)
+                
+                # For Isolation Forest, we'll use the mean score as our metric
+                # Higher mean score is better (less anomalous overall)
+                mean_score = np.mean(scores)
+                
+                # Store result
+                result = {
+                    'contamination': contamination,
+                    'n_estimators': n_estimators,
+                    'max_samples': max_samples,
+                    'mean_score': mean_score
+                }
+                all_results.append(result)
+                
+                # Update best model if this one is better
+                if mean_score > best_score:
+                    best_score = mean_score
+                    best_params = {
+                        'contamination': contamination,
+                        'n_estimators': n_estimators,
+                        'max_samples': max_samples
+                    }
+                    best_model = model
+    
+    # Convert results to DataFrame for easier analysis
+    results_df = pd.DataFrame(all_results)
+    
+    # Sort by mean_score (descending)
+    results_df = results_df.sort_values('mean_score', ascending=False)
+    
+    # Print results
+    print("\nParameter search completed!")
+    print(f"Best parameters: {best_params}")
+    print(f"Best score: {best_score}")
+    
+    # Print top 5 parameters
+    print("\nTop 5 parameter combinations:")
+    print(results_df.head(5))
+    
+    # 7. Train model with best parameters (if best_model is None)
+    if best_model is None:
+        print("\nNo valid model found. Using default parameters...")
+        best_model = IsolationForest(contamination=0.1, n_estimators=100, random_state=42)
+        best_model.fit(X_scaled)
+    
+    # 8. Save model and scaler
+    print(f"Saving model to {output_model_path} and scaler to {output_scaler_path}...")
+    joblib.dump(best_model, output_model_path)
+    joblib.dump(scaler, output_scaler_path)
+    
+    # 9. Visualization of anomaly scores
+    scores = best_model.decision_function(X_scaled)
+    threshold = np.percentile(scores, best_params['contamination'] * 100)
+    
+    plt.figure(figsize=(10, 6))
+    plt.hist(scores, bins=50, alpha=0.7)
+    plt.axvline(threshold, color='red', linestyle='dashed', linewidth=2, label=f'Threshold ({threshold:.3f})')
+    plt.title('Distribution of Anomaly Scores')
+    plt.xlabel('Anomaly Score')
+    plt.ylabel('Count')
+    plt.legend()
+    plt.savefig('anomaly_score_distribution.png')
+    plt.close()
+    
+    print("\nModel training completed and saved.")
+    print(f"A visualization of anomaly scores has been saved as 'anomaly_score_distribution.png'")
+    
+    # 10. Generate classification thresholds based on percentiles
+    percentiles = [30, 70]  # Use these percentiles to define low, medium, high deviation
+    thresholds = [np.percentile(scores, p) for p in percentiles]
+    
+    print("\nRecommended deviation classification thresholds:")
+    print(f"Low Deviation: score > {thresholds[1]:.3f}")
+    print(f"Medium Deviation: {thresholds[0]:.3f} < score <= {thresholds[1]:.3f}")
+    print(f"High Deviation: score <= {thresholds[0]:.3f}")
+    
+    # Return the best model and important information
+    return {
+        'model': best_model,
+        'scaler': scaler,
+        'best_params': best_params,
+        'feature_stats': X.describe(),
+        'anomaly_threshold': threshold,
+        'classification_thresholds': thresholds
+    }
+
+# Run the model training with manual parameter search
+if __name__ == "__main__":
+    # Update this to the path of your training data
+    folder_path = 'data/flows_data'  # Path to folder containing JSON files
+    
+    print(f"Starting model training with manual parameter search on data from {folder_path}")
+    result = train_model_with_manual_search(folder_path)
+    
+    if result:
+        # Print the best parameters and some statistics
+        print("\nTraining Summary:")
+        print(f"Best contamination: {result['best_params']['contamination']}")
+        print(f"Best n_estimators: {result['best_params']['n_estimators']}")
+        print(f"Best max_samples: {result['best_params']['max_samples']}")
+        print(f"Anomaly threshold: {result['anomaly_threshold']:.3f}")
